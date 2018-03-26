@@ -1,0 +1,42 @@
+ ZADANIE 1:
+ Wczytaj w funkcji init() dwa modele - sfery i statku - z plikow models/spaceship.obj i models/sphere.obj.
+ Uzyj zmiennych sphereModel i shipModel, oraz funkcji obj::loadModelFromFile(const char * filepath).
+ 
+ Nastepnie uzyj funkcji Core::DrawModel(obj::Model*) aby wyswietlic jeden z obiektow w poczatku ukladu wspolrzednych.
+ 
+ (Macierze widoku i rzutowania sa juz stworzone, a kamera jest odsunieta i patrzy w strone poczatku ukladu).
+
+ Stworz zmienna "uniform vec3 objectColor;" w pliku shader_2_1.frag, ktorej uzyjesz do przeslania koloru obiektu w formacie RGB do shadera.
+ Zmienna wbudowana gl_FragColor w shaderze jest typu vec4 - RGBA. Do czesci RGB przypisz kolor ze zmiennej objectColor, a do A (kanal alpha) - 1.0f.
+ Mozesz teraz kontrolowac kolor rysowanego obiektu, wysylajac przed rysowaniem zmienna objectColor przy uzyciu funkcji glUniform3f( int location, float v0, float v1, float v2 ) /*v0, v1, v2 to kolory rgb*/.
+
+ Parametr "location" oznacza adres zmiennej w pamieci karty graficznej do ktorej chcemy wartosci wyslac.
+ Mozna ten adres uzyskac wywolujac funkcje glGetUniformLocation(program, "nazwa zmiennej").
+
+ ZADANIE 2:
+ Kolory na powierzchni obiektu mozna urozmaicic, wyswietlajac "kolor" wektora normalnego do powierzchni w danym punkcie.
+
+ Wektor normalny wierzcholka dostepny jest w vertex shaderze (plik z rozszerzeniem .vert). Kolor powierzchni (piksela) ustala sie jednak we fragment shaderze (.frag).
+ Nalezy wiec przeslac wartosc wektora normalnego z vertex do fragment shadera. Sluza do tego specjalne zmienne (interpolatory).
+
+ Stworz zmienna typu "out vec3 nazwa" w vertex shaderze oraz odpowiadajaca mu zmienna "in vec3 nazwa" we fragment shaderze.
+ Przeslij przy jej uzyciu wartosc wektora normalnego.
+ Uzyj tej wartosci, aby w jakis sposob przypisac kolor pikselowi.
+ 
+ Aby otrzymac ladny efekt, najpierw znormalizuj wektor otrzymany przez fragment shader.
+ Nastepnie przeskaluj wartosci (x, y, z) wektora z przedzialu [-1, 1] do [0, 1] i przypisz je do kanalow R, G, B zmiennej gl_FragColor.
+
+
+ ZADANIE 3:
+ Stworz funkcje drawObject, ktora ulatwi rysowanie wielu obiektow.
+ Na liscie parametrow musza znalezc sie wskaznik na obj::Model oraz macierz modelu (model matrix) obiektu.
+ Wyswietl kilka obiektow w roznych pozycjach (i obejrzyj je z kazdej strony).
+ 
+ "Przyczep" model statku do kamery - uzaleznij jego macierz modelu od pozycji i orientacji kamery tak, aby wygladalo jakbys poruszal(a) sie statkiem.
+  glm::mat4 shipModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0,-0.25f,0)) * glm::rotate(-cameraAngle + glm::radians(90.0f), glm::vec3(0,1,0)) * glm::scale(glm::vec3(0.25f));
+  Przenalizuj powysza instrukcje i zastanow sie jak inaczej mozna rozwiazac przyczepienie statku do kamery.
+
+
+ ZADANIE 4:
+ Stworz uklad planetarny - jedna nieruchoma kule na srodku (Slonce) i kilka orbitujacych wokol niej planet.
+ Niech przynajmniej jedna planeta ma ksiezyce.
