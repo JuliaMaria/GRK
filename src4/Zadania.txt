@@ -1,0 +1,45 @@
+0. (Pomin, jezeli zrobiles/as zadanie 3. z poprzednich zajec).
+Obejrzyj pliki shader_4_1.vert i shader_4_1.frag. Zwroc uwage w szczegolnosci na zmienna interpNormal, przy uzyciu ktorej wektory normalne wierzcholkow dostepne w vertex shaderze przesylane sa do fragment shadera.
+
+
+1. Oblicz we fragment shaderze oswietlenie obiektu przy uzyciu modelu Phonga dla swiatla rozproszonego (diffuse):
+
+a) Potrzebne bedzie wektor kiernku padania swiatla
+- Przeslij do fragment shadera zmienna typu "uniform vec3", w ktorej bedzie sie znajdowac kierunek padania swiatla w scenie.
+- Nalezy to zrobic analogicznie do tego, jak przesylana jest zmienna "objectColor". Jedyna roznica bedzie taka, ze kierunek padania swiatla nie zalezy od obiektu, wiec wywolanie glUniform3f powinno pojawic sie tylko raz, przed rysowaniem wszystkich obiektow.
+- Jako kierunek swiatla wybierz dowolny wektor jednostkowy.
+
+b) Oblicz natezenie:
+- Natezenie = Iloczyn skalarny wektora normalnego powierzchni i odwrotnego wektora kierunku padania swiatla.
+- Natezenie nie moze byc ujemne. Przytnij natezenie do zera przy uzyciu: x = max(x, 0.0)
+- Pamietaj, aby znormalizowac wektor normalny przed uzyciem go w obliczeniach (usrednianie wektorow normalnych wierzcholkow moze spowodowac, ze przestaje one byc jednostkowe).
+
+c) Zastosuj obliczone natezenie aby zmodyfikowac kolor obiektu:
+- Przemnoz kolor RGB piksela przez obliczone natezenie.
+
+
+2. Dlaczego oswietlenie statku nie zmienia sie podczas jego obracania?
+(Wektory normalne sa w ukladzie lokalnym modelu, a wektor padania swiatla w ukladzie swiata)
+
+Nalezy wykonac transformacje wektorow normalnych do przestrzeni swiata:
+- Przeslij macierz modelu rysowanego obiektu (modelMatrix) jako osobna zmienna do vertex shadera (uniform mat4).
+- Przemnoz przez te macierz wektor normalny wierzcholka przed przeslaniem go do fragment shadera.
+- Wspolrzedna 'w' dopisana do wektora przed mnozeniem przez macierz powinna byc ustawiona na 0. Wynika to z tego, ze w przypadku transformacji wektorow reprezentujacych kierunki w przestrzeni, nie chcemy dokonywac translacji - np. wektor normalny do powierzchni zalezy od orientacji obiektu, ale nie od jego pozycji (przesuniecia) w przestrzeni swiata.
+
+
+3. Uzupelnil model o czynnik swiatla odbitego (specular). W tym celu:
+
+a) Potrzebny bedzie wektor (punkt_powierzchni -> pozycja_kamery):
+- Wyslij pozycje kamery (cameraPos) jako kolejna zmienna do fragment shadera.
+- Analogicznie do wektorow normalnych, przeslij z vertex do fragment shadera pozycje wierzcholkow (vertexPosition) w przestrzeni swiata (czyli pomnozone przez macierz modelMatrix). Pamietaj, ze tym razem wektory reprezentuja punkty, a nie kierunki - wspolrzedna 'w' przed mnozenie musi byc ustawiona na 1.
+- Oblicz wektor V jako roznice pozycji kamery i pozycji punktu powierzchni
+
+b) Oblicz natezenie swiatla odbitego we fragment shaderze:
+- Uzyskaj "odbity wektor kierunku swiatla" R przy uzyciu funkcji reflect.
+- Oblicz natezenie: iloczyn skalarny V i R, przyciety do zera ( max(...,0.0) ), a nastepnie podniesiony do wysokiej potegi (np. 8, 50, 1000), ktora jest miara polyskliwosci powierzchni
+
+c) Ustal ostateczny kolor piksela na  objectColor * diffuse + vec3(1.0) * specular. Oznacza to najprostszy przypadek, gdy kolor swiatla odbitego jest bialy.
+
+
+4. Stworz uklad planetarny - jedna nieruchoma kule na srodku (Slonce) i kilka orbitujacych wokol niej planet.
+Niech przynajmniej jedna planeta ma ksiezyce.
