@@ -1,0 +1,25 @@
+Twoim zadaniem bêdzie zrealizowaæ ruch kamery (wraz z przyczepionym do niej statkiem) pomiêdzy punktami kontrolnymi.
+
+1. Zaprogramuj interpolacjê pozycji na (zamkniêtej) œcie¿ce, wyznaczonej przez punkty kontrolne:
+- Najwygodniej bêdzie pisaæ kod w funkcji createCameraMatrix() (gdzie interpolacja po œcie¿ce zostanie od razu u¿yta do ustalenia ruchu kamery)
+- Zbiór punktów kontrolnych znajduje siê w tablicy cameraKeyPoints. Œcie¿ka powinna zaczynaæ i koñczyæ siê w punkcie cameraKeyPoints[0] (po punkcie kontrolnymi o indeksie n-1 nastêpuje punkt o indeksie 0 - i tak w kó³ko).
+- U¿yj zmiennej time do kontrolowania ruchu wzd³u¿ œcie¿ki. W czasie time=NUM_CAMERA_POINTS, ruch po œcie¿ce powinien wróciæ do punktu pocz¹tkowego (oznacza to po prostu, ¿e ruch po œcie¿ce bêdzie trwa³ tyle sekund, ile jest punktów kontrolnych, oraz ¿e ruch pomiêdzy ka¿dymi dwoma punktami bêdzie trwa³ jedn¹ sekundê)
+- U¿yj funkcji glm::catmullRom(). Przyjmuje ona cztery argumenty typu glm::vec3 (v1, v2, v3, v4) i jeden argument typu float (s). Zwraca ona glm::vec3, w którym znajduje siê zinterpolowana pozycja miêdzy punktami v2 i v3 (parametr s wybiera punkt na œcie¿ce; dla s=0 zwracane jest v2, dla s=1 zwracane jest v3, dla 0<s<1 zwracana jest zinterpolowana pozycja na œcie¿ce). Punkty v1 i v4 s¹ dodatkowymi punktami kontroluj¹cymi krzywiznê œcie¿ki. Dla krzywych Catmulla-Roma, nale¿y jako v1,v2,v3,v4 podaæ po prostu cztery kolejne punkty ze zbioru punktów kontrolnych
+- Ze zmiennej time musisz uzyskaæ dwie informacje: która sekunda ruchu obecnie trwa, oraz jaki u³amek tej sekundy up³yn¹³ - czyli po prostu wy³uskaæ ze zmiennej jej czêœæ ca³kowit¹, oraz u³amkow¹. Mo¿esz na przyk³ad u¿yæ funkcji floorf() z biblioteki matematycznej C++.
+- Czêœæ ca³kowita pozwoli ustaliæ, który punkty kontrolne w danej chwili nale¿y przes³aæ do funkcji catmullRom(). Na przyk³ad w sekundzie pierwszej (tzn. tej, dla której czêœæ ca³kowita zmiennej time wynosi zero), jako v0,v1,v2,v3 nale¿y wys³aæ punkty o indeksach NUM_CAMERA_POINTS-1,0,1,2.
+
+2. Spraw, aby kamera porusza³a siê po œcie¿ce.
+- U¿yj pozycji uzyskanej w poprzednim zadaniu jako pozycji kamery.
+
+3. Kamera porusza siê po œcie¿ce, ale nie patrzy w kierunku ruchu.
+- Potrzebny jest tzw. wektor styczny do krzywej (któr¹ jest nasza œcie¿ka). Dla wiêkszoœci krzywych u¿ywanych w grafice mo¿na go obliczyæ analitycznie, ale biblioteka glm nie daje takiej mo¿liwoœci. U¿yjemy wiêc numerycznego przybli¿enia wektora stycznego.
+- Wektor styczny do krzywej parametryzowanej zmienn¹ s, to po prostu wartoœæ pochodnej funkcji wektorowej wzglêdem zmiennej s. Najprostsza numeryczna metoda przybli¿ania wartoœci pochodnej funkcji to metoda ró¿nic skoñczonych: Aby oszacowaæ prêdkoœæ zmiany wartoœci funkcji w punkcie s=x, znajdujemy jej wartoœæ w nieco dalszym punkcie s=x+Epsilon oraz wartoœæ w nieco bli¿szym punkcie s=x-Epsilon, i dzielimy ró¿nicê tych dwóch wartoœci przez 2*Epsilon (je¿eli zastanawiasz siê dlaczego to dzia³a, przypomnij sobie definicjê pochodnej funkcji). W naszym przypadku tylko kierunek wektora stycznego ma znaczenie (a nie jego d³ugoœæ), wiêc mo¿emy pomin¹æ dzielenie. Ostatecznie mo¿emy wiêc napisaæ:
+wektorStyczny = glm::normalize(glm::catmullRom(..., s+0.001) - glm::catmullRom(..., s-0.001));
+(S¹ tu pewne niuanse, np. sta³a 0.001 jest dobrana eksperymentalnie; ponadto mo¿na siê zastanawiaæ, co w przypadku gdy s+0.001 przekroczy 1, albo s-0.001 spadnie poni¿ej 0. W naszym przypadku problemy nie bêd¹ widoczne).
+- U¿yj wektora stycznego jako nowego kierunku patrzenia kamery (cameraDir).
+
+4. Popraw orientacjê statku.
+- Orientacja statku jest w kodzie ustalana przy u¿yciu zmiennej cameraAngle. Najproœciej bêdzie wy³uskaæ k¹t kamery (którego teraz ju¿ w definicji samej kamery nie potrzebujemy, bo ustalamy kierunek kamery jako wektor styczny do œcie¿ki) z aktualnego kierunku kamery:
+cameraAngle = atan2f(cameraDir.z, cameraDir.x);
+
+5. Stwórz w³asn¹, ciekawsz¹ œcie¿kê kamery (np. lawirowanie miêdzy asteroidami).
