@@ -16,20 +16,20 @@ class Client extends Thread {
 
     public void round() {
 
-     try {
-         boolean terminated = false;
-         while (!terminated) {
-             Server.semaphore.acquire();
-             terminated = Server.play(this, id);
-             Server.semaphore.release();
-         }
-     }
-     catch (Exception e) {
-         e.printStackTrace();
-     }
-     finally {
-         Server.semaphore.release();
-     }
+        try {
+            boolean terminated = false;
+            while (!terminated && Server.playersInactive[id] != 1) {
+                Server.semaphore.acquire();
+                terminated = Server.play(this, id);
+                Server.semaphore.release();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            Server.semaphore.release();
+        }
 
     }
 
@@ -69,6 +69,7 @@ public class Server
     public static int round = 1;
 
     public static Client[] threads = new Client[5];
+    public static int[] playersInactive = new int[5];
 
     public static java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(1);
     public static final java.util.concurrent.CyclicBarrier gate = new java.util.concurrent.CyclicBarrier(5);
@@ -265,13 +266,12 @@ public class Server
 
 
             for (int i = 0; i < 5; i++) {
-
                 if (Server.round != 1) {
                     Server.os[i].writeBytes(String.format("ROUND %d\n", Server.round));
-                    System.out.println(String.format("ROUND %d\n", Server.round));
+                    System.out.println(String.format("ROUND %d", Server.round));
                 } else {
                     Server.os[i].writeBytes(String.format("START %d\n", i + 1));
-                    System.out.println(String.format("START %d\n", i + 1));
+                    System.out.println(String.format("START %d", i + 1));
                 }
                 Random rand = new Random();
                 currentX[i] = rand.nextInt(50);
@@ -281,7 +281,7 @@ public class Server
                 board[currentX[i]][currentY[i]] = i + 1;
                 System.out.println(String.format("Player: %d Login: %s Position: (%d,%d)", i, logins[i], currentX[i], currentY[i]));
                 Server.os[i].writeBytes(String.format("PLAYERS (%d,%d) (%d,%d) (%d,%d) (%d,%d) (%d,%d)\n", Server.currentX[0], Server.currentY[0], Server.currentX[1], Server.currentY[1], Server.currentX[2], Server.currentY[2], Server.currentX[3], Server.currentY[3], Server.currentX[4], Server.currentY[4]));
-                System.out.println(String.format("PLAYERS (%d,%d) (%d,%d) (%d,%d) (%d,%d) (%d,%d)\n", Server.currentX[0], Server.currentY[0], Server.currentX[1], Server.currentY[1], Server.currentX[2], Server.currentY[2], Server.currentX[3], Server.currentY[3], Server.currentX[4], Server.currentY[4]));
+                System.out.println(String.format("PLAYERS (%d,%d) (%d,%d) (%d,%d) (%d,%d) (%d,%d)", Server.currentX[0], Server.currentY[0], Server.currentX[1], Server.currentY[1], Server.currentX[2], Server.currentY[2], Server.currentX[3], Server.currentY[3], Server.currentX[4], Server.currentY[4]));
                 Server.currentDirections[i] = Server.is[i].readLine().split("\\s+")[1];
                 System.out.println(Server.currentDirections[i]);
                 if (Server.currentDirections[i].equals("N")) {
@@ -292,7 +292,8 @@ public class Server
                             System.out.println("WIN");
                         } else {
                             Server.os[i].writeBytes(String.format("LOST %d\n", Server.positionIdx + 1));
-                            System.out.println(String.format("LOST %d\n", Server.positionIdx + 1));
+                            System.out.println(String.format("LOST %d", Server.positionIdx + 1));
+                            playersInactive[i] = 1;
                         }
                         Server.positionIdx--;
                         for (int z = 0; z < 50; z++) {
@@ -315,7 +316,8 @@ public class Server
                             System.out.println("WIN");
                         } else {
                             Server.os[i].writeBytes(String.format("LOST %d\n", Server.positionIdx + 1));
-                            System.out.println(String.format("LOST %d\n", Server.positionIdx + 1));
+                            System.out.println(String.format("LOST %d", Server.positionIdx + 1));
+                            playersInactive[i] = 1;
                         }
                         Server.positionIdx--;
                         for (int z = 0; z < 50; z++) {
@@ -338,7 +340,8 @@ public class Server
                             System.out.println("WIN");
                         } else {
                             Server.os[i].writeBytes(String.format("LOST %d\n", Server.positionIdx + 1));
-                            System.out.println(String.format("LOST %d\n", Server.positionIdx + 1));
+                            System.out.println(String.format("LOST %d", Server.positionIdx + 1));
+                            playersInactive[i] = 1;
                         }
                         Server.positionIdx--;
                         for (int z = 0; z < 50; z++) {
@@ -361,7 +364,8 @@ public class Server
                             System.out.println("WIN");
                         } else {
                             Server.os[i].writeBytes(String.format("LOST %d\n", Server.positionIdx + 1));
-                            System.out.println(String.format("LOST %d\n", Server.positionIdx + 1));
+                            System.out.println(String.format("LOST %d", Server.positionIdx + 1));
+                            playersInactive[i] = 1;
                         }
                         Server.positionIdx--;
                         for (int z = 0; z < 50; z++) {
@@ -387,6 +391,7 @@ public class Server
 
             Server.board = new int[50][50];
             Server.currentDirections = new String[5];
+            Server.playersInactive = new int[5];
             currentX = new int[5];
             currentY = new int[5];
             positionIdx = 4;
@@ -433,7 +438,7 @@ public class Server
 
         for (int i = 0; i < 5; i++) {
             Server.os[i].writeBytes(String.format("KONIEC %s %s %s %s %s\n", Server.logins[winnersList[0]], Server.logins[winnersList[1]], Server.logins[winnersList[2]], Server.logins[winnersList[3]], Server.logins[winnersList[4]]));
-            System.out.println(String.format("KONIEC %s %s %s %s %s\n", Server.logins[winnersList[0]], Server.logins[winnersList[1]], Server.logins[winnersList[2]], Server.logins[winnersList[3]], Server.logins[winnersList[4]]));
+            System.out.println(String.format("KONIEC %s %s %s %s %s", Server.logins[winnersList[0]], Server.logins[winnersList[1]], Server.logins[winnersList[2]], Server.logins[winnersList[3]], Server.logins[winnersList[4]]));
         }
         gameSocket.close();
 
@@ -442,3 +447,5 @@ public class Server
 
     }
 }
+
+
