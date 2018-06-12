@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.*;
 
-class ZatackaClient {
+class Client {
 
     public static void main(String argv[]) throws Exception {
 
@@ -22,11 +22,11 @@ class ZatackaClient {
         System.out.println(inFromServer.readLine());
         while (messageFromServer.equals("OK")) {
             System.out.println(inFromServer.readLine());
-                for (int j = 0; j < 50; j++) {
-                    System.out.println(inFromServer.readLine());
-                }
+            for (int j = 0; j < 50; j++) {
+                System.out.println(inFromServer.readLine());
+            }
             outToServer.writeBytes("MOVE S\n");
-                System.out.println("MOVE S");
+            System.out.println("MOVE S");
             messageFromServer = inFromServer.readLine();
             System.out.println(messageFromServer);
         }
@@ -40,11 +40,11 @@ class ZatackaClient {
             System.out.println(inFromServer.readLine());
             while (messageFromServer.equals("OK")) {
                 System.out.println(inFromServer.readLine());
-                    for (int j = 0; j < 50; j++) {
-                        System.out.println(inFromServer.readLine());
-                    }
+                for (int j = 0; j < 50; j++) {
+                    System.out.println(inFromServer.readLine());
+                }
                 outToServer.writeBytes("MOVE S\n");
-                    System.out.println("MOVE S");
+                System.out.println("MOVE S");
                 messageFromServer = inFromServer.readLine();
                 System.out.println(messageFromServer);
 
