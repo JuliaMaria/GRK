@@ -274,8 +274,10 @@ public class Server
                     System.out.println(String.format("START %d", i + 1));
                 }
                 Random rand = new Random();
-                currentX[i] = rand.nextInt(50);
-                currentY[i] = rand.nextInt(50);
+                ///currentX[i] = rand.nextInt(50);
+                ///currentY[i] = rand.nextInt(50);
+                currentX[i] = 20 + i;
+                currentY[i] = 20 - i;
                 System.out.println(currentX[i]);
                 System.out.println(currentY[i]);
                 board[currentX[i]][currentY[i]] = i + 1;
